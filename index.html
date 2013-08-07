@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>PhotoEdit</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/jquery-ui.css" />
+        <link rel="stylesheet" href="css/main.css">
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+        <script src="js/vendor/jQuery/jquery.js"></script>
+        <script src="js/vendor/jquery-ui/jquery-ui.js"></script>
+        <script src="js/imageClass.js"></script>
+        <script src="js/editorClass.js"></script>
+        <script src="js/setupUi.js"></script>
+        <script src="js/main.js"></script>
+        <script src="js/functions.js"></script>
+    </head>
+    <body>
+
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    	
+    	<div id="startup">
+    		<h1>Please select a file to work with</h1>
+    		<form id="fileUpload">
+    			<input type="file" id="file">
+    			<input type="submit" value="Bearbeiten">  		
+    		</form>
+    	</div>
+
+        <div id="photo-container">
+        	<img id="image">
+        </div>
+        <div id="editor-container">
+        	<form name="control-form">
+        		<div id="control-container">
+        			<button value="undo">Undo</button>
+        		</div>
+        	</form>
+        	<div id="methods">
+        		<h3>Bild</h3>
+        			<div>
+        				<label for="saturation">Saturation:</label>
+        					<div id="saturation-slider"></div>
+						<input type="text" id="saturation" readonly>
+        			</div>
+        			
+        		<h3>Vordefinierte Filter</h3>
+        			<div>
+        				<form name="pre-filter-form">
+							<div id="pre-filter-container">
+								<button value="red">Red</button>
+								<button value="green">Green</button>
+								<button value="blue">Blue</button>
+								<button value="negativ">Negativ</button>
+						</form>
+        			</div>
+        	</div>
+        </div>
+    </body>
+</html>
