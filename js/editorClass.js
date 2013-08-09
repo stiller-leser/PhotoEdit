@@ -2,31 +2,31 @@ function editorClass(){ //Named editorClass since there is a Image-Object in JS
 }
 
 //Introduce namespace for later
-var iD = {
-	//The original image source, can be used to restore original
-	origImageSrc : "",
-	//Everything concerning the new image, whatever that may be
+var cD = {
 	image : "",
-	imageSrc : "",
 	width : 0,
 	height : 0,
 	//Save the canvas in here
 	canvas : "",
 	context : "",
-	content : "",
+	imageData : "",
 	//Pixels-Array is going to be saved here aswell as its length
 	pixels : [],
 	pixelsLength : 0,
-	
-};
+}
+
+var pD = {
+	canvas : "",
+	context : "",
+	imageData : ""
+}
 
 var eD = {
 	start : false,
-	undo : false,
-	offset : {r: 0, g: 1, b: 2, a: 3}	
+	preview : false,
+	offset : {r: 0, g: 1, b: 2, a: 3},
+	history : []
 }
-
-var history = [];
 
 editorClass.prototype.loadFile = function(){
 	var file = $("#file").get(0).files[0];
@@ -34,67 +34,78 @@ editorClass.prototype.loadFile = function(){
 	imageClass = new imageClass(this); //Let's the image know, which editor to work with
 	//Necessary because imageClass is loaded before editorClass
 	
-	iD.imageSrc = URL.createObjectURL(file);
+	imageSrc = URL.createObjectURL(file);
 	
-	//Save the original image src
-	iD.origImageSrc = URL.createObjectURL(file);
+	cD.image = new Image();
+	cD.image.src = imageSrc;
+	cD.image.onload = function(){ //This changes scope in here and is now the Image-Object
+		cD.width = this.width; //Still can access the cD-Namespace though
+		cD.height = this.height;
+		cD.canvas = $('<canvas/>',{
+                   id: 'canvas'                    
+                }).prop({
+                    width: cD.width,
+                    height: cD.height
+                });
 	
-	this.draw();
-	eD.start = true;
+		$('#photo-container').append(cD.canvas);
+		$("#canvas").load("/ #canvas",""); //Reload canvas to reapply css
+		cD.canvas = $("#canvas")[0];
+		cD.context = cD.canvas.getContext("2d");
+		// get the 2d context of the canvas
+		cD.context.drawImage(cD.image, 0, 0);
+		cD.imageData = cD.context.getImageData(0, 0, cD.width, cD.height);
+		eD.history.push(cD.imageData);
+	}	
 };
 
-editorClass.prototype.createCanvas = function(){
-	var image = $("#image").get(0);
-	// get image element from document tree
-	iD.canvas = document.createElement("canvas");
-	// create new canvas element
-
-	iD.width = image.width; //Better to get these values again in case they changed somehow
-	iD.height = image.height;
-
-	iD.canvas.width = iD.width;
-	// set canvas dimensions to image dimensions
-	iD.canvas.height = iD.height;
-	
-	iD.context = iD.canvas.getContext("2d");
-	// get the 2d context of the canvas
-	iD.context.drawImage(image, 0, 0);
-	// draw the image to the context, but not visible for the user
-	iD.content = iD.context.getImageData(0, 0, iD.width, iD.height);
-	// get the image data of the context and save them into namespace
-}
-
 editorClass.prototype.getPixels = function(){
-	iD.pixels = iD.content.data;
+	if(!eD.preview){ //If no slider is used
+		eD.history.push(cD.imageData);
+	}
+	cD.imageData = cD.context.getImageData(0, 0, cD.width, cD.height);
+	// get the image data of the context and save them into namespace
+	cD.pixels = cD.imageData.data;
 	// get the pixels
 
-	iD.pixelsLength = iD.width * iD.height * 4;
+	cD.pixelsLength = cD.width * cD.height * 4;
 	// precompute the length of the pixel array
 }
 
 editorClass.prototype.draw = function(){
-	if(eD.start){ //If it's not the first time draw is called
-		iD.context.putImageData(iD.content, 0, 0);
-		// set the new pixels to the context (canvas)
-		iD.imageSrc = iD.canvas.toDataURL();
-		//Store current canvas in history for possible undo
-	}
-	
-	iD.image = new Image();
-	iD.image.src = iD.imageSrc;
-	iD.image.onload = function(){ //This changes scope in here and is now the Image-Object
-		iD.width = this.width; //Still can access the iD-Namespace though
-		iD.height = this.height;
-		iD.image.id = "image"; //Set DOM-id of image
-	
-		history.push($("#image"));
-		
-		$("#image").replaceWith(iD.image); //Replace old image with new one
-		$("#image").load("/ #image",""); //Reload #image to reapply css
+	if(eD.preview){ //If a slider is used fill preview to keep image data
+		pD.context.putImageData(cD.imageData, 0, 0);
+	} else {
+		cD.context.putImageData(cD.imageData, 0, 0);
 	}
 }
 
+editorClass.prototype.setupPreview = function(){
+	eD.preview = true;
+	pD.canvas = $('<canvas/>',{
+                   id: 'preview'                    
+                }).prop({
+                    width: cD.width,
+                    height: cD.height
+                });
+	
+	$('#photo-container').append(pD.canvas);
+	$("#preview").load("/ #preview",""); //Reload #pDCanvas to reapply css
+	pD.canvas = $("#preview")[0];
+	pD.context = pD.canvas.getContext("2d");
+	// get the 2d context of the canvas
+}
+
+editorClass.prototype.removePreview = function(){
+	eD.preview = false;
+	cD.context.putImageData(pD.context.getImageData(0, 0, cD.width, cD.height), 0, 0)
+	$("#preview").remove();
+}
+
 editorClass.prototype.undo = function(){
-		$("#image").replaceWith(history.pop()); //Replace old image with new one
-		$("#image").load("/ #image",""); //Reload #image to reapply css
+	if(eD.history.length > 0){
+		var temp = eD.history.pop();
+		cD.context.createImageData(cD.width,cD.height);
+		cD.context.putImageData(temp, 0, 0);
+	}
 }

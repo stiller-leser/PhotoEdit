@@ -1,5 +1,6 @@
 function setupUi(editor){
 	// prepare UI
+	$("#preview").css("display","none");
 	$("#startup").css("display","none");
 	$("#photo-container").css("display","block");
 	$("#editor-container").css("display","block");
@@ -11,18 +12,25 @@ function setupUi(editor){
 	});
 	
 	//Animate and configure saturation
-	$("#saturation-slider").slider({
+	$("#brightness-slider").slider({
 		range: "max",
-		min: 0,
-		max: 100,
+		min: -128,
+		max: 128,
 		value: 0,
+		start: function(event, ui){
+			editor.setupPreview();
+			eD.history.push(cD.imageData);
+		},
 		slide: function(event, ui){
-			$("#saturation").val(ui.value + "%");
-			saturation(ui.value);
+			$("#brightness").val(ui.value);
+			imageClass.brightness(ui.value);
+		},
+		stop: function(event, ui){
+			editor.removePreview();
+			$("#brightness-slider").slider("value","0");
+			$("#brightness").val($("#brightness-slider").slider("value"));
 		}
 	});
-	
-	$("#saturation").val($("#saturation-slider").slider("value") + "%");
 	
 	//Animate and configure predefined filters
 	$("#pre-filter-container button").button().click(function(event){
