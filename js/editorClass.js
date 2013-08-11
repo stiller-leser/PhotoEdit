@@ -22,7 +22,6 @@ var pD = {
 }
 
 var eD = {
-	start : false,
 	preview : false,
 	offset : {r: 0, g: 1, b: 2, a: 3},
 	history : []
@@ -55,7 +54,7 @@ editorClass.prototype.loadFile = function(){
 		// get the 2d context of the canvas
 		cD.context.drawImage(cD.image, 0, 0);
 		cD.imageData = cD.context.getImageData(0, 0, cD.width, cD.height);
-		eD.history.push(cD.imageData);
+		//eD.history.push(cD.imageData);
 	}	
 };
 
@@ -104,8 +103,7 @@ editorClass.prototype.removePreview = function(){
 
 editorClass.prototype.undo = function(){
 	if(eD.history.length > 0){
-		var temp = eD.history.pop();
-		cD.context.createImageData(cD.width,cD.height);
-		cD.context.putImageData(temp, 0, 0);
+		cD.imageData = eD.history.pop();
+		cD.context.putImageData(cD.imageData, 0, 0);
 	}
 }
