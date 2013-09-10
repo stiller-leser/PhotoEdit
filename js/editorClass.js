@@ -2,7 +2,7 @@ function editorClass(){ //Named editorClass since there is a Image-Object in JS
 }
 
 //Introduce namespace for later
-var cD = {
+var cD = { //Normal canvas you are working with
 	image : "",
 	width : 0,
 	height : 0,
@@ -12,20 +12,22 @@ var cD = {
 	imageData : "",
 	//Pixels-Array is going to be saved here aswell as its length
 	pixels : [],
-	pixelsLength : 0,
-}
+	pixelsLength : 0
+};
 
-var pD = {
+var pD = { //Preview canvas
+	width: 0,
+	height: 0,
 	canvas : "",
 	context : "",
 	imageData : ""
-}
+};
 
 var eD = {
 	preview : false,
 	offset : {r: 0, g: 1, b: 2, a: 3},
 	history : []
-}
+};
 
 editorClass.prototype.loadFile = function(){
 	var file = $("#file").get(0).files[0];
@@ -55,55 +57,86 @@ editorClass.prototype.loadFile = function(){
 		cD.context.drawImage(cD.image, 0, 0);
 		cD.imageData = cD.context.getImageData(0, 0, cD.width, cD.height);
 		//eD.history.push(cD.imageData);
-	}	
+	};	
 };
 
 editorClass.prototype.getPixels = function(){
-	if(!eD.preview){ //If no slider is used
-		eD.history.push(cD.imageData);
-	}
+	eD.history.push(cD.imageData);
 	cD.imageData = cD.context.getImageData(0, 0, cD.width, cD.height);
-	// get the image data of the context and save them into namespace
-	cD.pixels = cD.imageData.data;
-	// get the pixels
+	var pixels = cD.imageData.data;
+	
+	return pixels;
+};
 
-	cD.pixelsLength = cD.width * cD.height * 4;
-	// precompute the length of the pixel array
-}
+editorClass.prototype.getPreviewPixels = function(){
+	pD.imageData = pD.context.getImageData(0, 0, pD.width, pD.height);
+	var pixels = pD.imageData.data;
+	
+	return pixels;
+};
 
 editorClass.prototype.draw = function(){
 	if(eD.preview){ //If a slider is used fill preview to keep image data
-		pD.context.putImageData(cD.imageData, 0, 0);
+		
+		pD.imageData = pD.context.createImageData(pD.width, pD.height);
+	
+		for(var i = 0; i < pD.imageData.data.length; i += 4){ //Build imageData
+    		pD.imageData.data[i + eD.offset["r"]] = pD.pixels[i + eD.offset["r"]];
+    		pD.imageData.data[i + eD.offset["g"]] = pD.pixels[i + eD.offset["g"]];
+    		pD.imageData.data[i + eD.offset["b"]] = pD.pixels[i + eD.offset["b"]];
+    		pD.imageData.data[i + eD.offset["a"]] = pD.pixels[i + eD.offset["a"]];
+		}
+		
+		pD.context.putImageData(pD.imageData, 0, 0);
+		
 	} else {
+		cD.imageData = cD.context.createImageData(cD.width, cD.height);
+	
+		for(var i = 0; i < cD.imageData.data.length; i += 4){ //Build imageData
+    		cD.imageData.data[i + eD.offset["r"]] = cD.pixels[i + eD.offset["r"]];
+    		cD.imageData.data[i + eD.offset["g"]] = cD.pixels[i + eD.offset["g"]];
+    		cD.imageData.data[i + eD.offset["b"]] = cD.pixels[i + eD.offset["b"]];
+    		cD.imageData.data[i + eD.offset["a"]] = cD.pixels[i + eD.offset["a"]];
+		}
+			
 		cD.context.putImageData(cD.imageData, 0, 0);
 	}
-}
+};
 
-editorClass.prototype.setupPreview = function(){
+editorClass.prototype.setupPreview = function(id, widthNew, heightNew){
 	eD.preview = true;
+	
+	pD.width = widthNew;
+	pD.height = heightNew;
+	
 	pD.canvas = $('<canvas/>',{
                    id: 'preview'                    
                 }).prop({
-                    width: cD.width,
-                    height: cD.height
+                    width: pD.width,
+                    height: pD.height
                 });
 	
+   	$("#canvas").css("display","none");
+    
 	$('#photo-container').append(pD.canvas);
 	$("#preview").load("/ #preview",""); //Reload #pDCanvas to reapply css
+	
 	pD.canvas = $("#preview")[0];
 	pD.context = pD.canvas.getContext("2d");
 	// get the 2d context of the canvas
-}
+	pD.context.drawImage($(id)[0], 0, 0, pD.width, pD.height);
+	pD.imageData = pD.context.getImageData(0, 0, pD.width, pD.height);	
+};
 
-editorClass.prototype.removePreview = function(){
-	eD.preview = false;
-	cD.context.putImageData(pD.context.getImageData(0, 0, cD.width, cD.height), 0, 0)
+editorClass.prototype.savePreviewChanges = function(){
+	editor.draw();
 	$("#preview").remove();
-}
+	$("#canvas").css("display","block");
+};
 
 editorClass.prototype.undo = function(){
 	if(eD.history.length > 0){
 		cD.imageData = eD.history.pop();
 		cD.context.putImageData(cD.imageData, 0, 0);
 	}
-}
+};

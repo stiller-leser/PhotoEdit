@@ -33,35 +33,80 @@
     		<h1>Please select a file to work with</h1>
     		<form id="fileUpload">
     			<input type="file" id="file">
-    			<input type="submit" value="Bearbeiten">  		
+    			<input type="submit" value="Edit">  		
     		</form>
     	</div>
 
         <div id="photo-container">
         </div>
         <div id="editor-container">
-        	<form name="control-form">
-        		<div id="control-container">
+        	<div id="control-container">
+        		<form name="control-form">
         			<button value="undo">Undo</button>
-        		</div>
-        	</form>
+        	    </form>
+        	</div>
         	<div id="methods">
-        		<h3>Bild</h3>
-        			<div>
+        		<h3>Image</h3>
+        			<div id="image-methods">
         				<label for="brightness">Brightness:</label>
+        				<input type="text" id="brightness" readonly>
         					<div id="brightness-slider"></div>
-						<input type="text" id="brightness" readonly>
+        				<label for="contrast">Contrast:</label>
+        				<input type="text" id="contrast" readonly>
+        					<div id="contrast-slider"></div>
+        				<label for="saturation">Saturation:</label>
+        				<input type="text" id="saturation" readonly>
+        					<div id="saturation-slider"></div>
+        				<label for="hue">Hue:</label>
+        				<input type="text" id="hue" readonly>
+        					<div id="hue-slider"></div>
+        				<label for="grey">Shades of Grey:</label>
+        				<input type="text" id="grey" readonly>
+        					<div id="grey-slider"></div> 	
+        				<form name="grey-form" id="grey-form">
+        					<button value="grey">Grey</button>
+        				</form>       					
         			</div>
+
         			
-        		<h3>Vordefinierte Filter</h3>
-        			<div>
+        		<h3>Predefined Filters</h3>
+        			<div id="pre-filter-container">
         				<form name="pre-filter-form">
-							<div id="pre-filter-container">
-								<button value="red">Red</button>
-								<button value="green">Green</button>
-								<button value="blue">Blue</button>
-								<button value="negativ">Negativ</button>
+							<button value="red">Red</button>
+							<button value="green">Green</button>
+							<button value="blue">Blue</button>
+							<button value="negativ">Negativ</button>
 						</form>
+						<label for="blur">Blur</label>
+						<input type="text" id="blur" readonly>
+							<div id="blur-slider"></div>
+    				</div>
+        			
+        		<h3>Custom Filters</h3>
+        			<div id="cus-filter-container">
+        				<form name="cus-filter-form" id="cus-filter-form">
+        					<script type="text/javascript">
+        						for(var i=0; i<25; i += 1){
+        							if(i%5 === 0){
+        								$("#cus-filter-form").append("<br>");
+        							}
+        							$("#cus-filter-form").append("<input type='text' class='filter'>");
+        						}
+        						$("#cus-filter-container").load("/ #cus-filter-container","");        					
+        					</script>
+        					<input type="submit" id="apply-filter" value="Apply">
+        				</form>
+        			</div>	
+        			        			
+        		<h3>Resize</h3>
+        			<div id="resize-container">
+        				<form name="resize-form" id="resize-form">
+	        					<label for="width">Width:</label>
+	        					<input type="text" id="width" placeholder="1024">
+	        					<label for="height">Height:</label>
+	        					<input type="text" id="height" placeholder="768">
+	        					<input type="submit" id="resize" value="Resize">   		
+        				</form>
         			</div>
         	</div>
         </div>
